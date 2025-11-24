@@ -15,5 +15,5 @@
     "aiofiles>=0.8.0",
     "packaging>=21.0"
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

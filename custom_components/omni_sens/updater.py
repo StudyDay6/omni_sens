@@ -17,7 +17,7 @@ from homeassistant.components import persistent_notification
 _LOGGER = logging.getLogger(__name__)
 
 # GitHub 仓库信息
-GITHUB_REPO = "StudyDay6/ct_ble_devices"  # 修改为你的仓库
+GITHUB_REPO = "StudyDay6/omni_sens"  # 修改为你的仓库
 GITHUB_API_BASE = "https://api.github.com/repos"
 CHECK_INTERVAL = timedelta(hours=24)  # 每24小时检查一次（测试用）
 AUTO_UPDATE_ENABLED = True  # 是否启用自动更新
@@ -41,7 +41,7 @@ async def async_setup_auto_update(hass: HomeAssistant, entry: ConfigEntry) -> Op
     
     try:
         # 获取当前版本
-        # 在运行时，集成路径是 config/custom_components/ct_ble_devices/
+        # 在运行时，集成路径是 config/custom_components/omni_sens/
         integration_path = Path(__file__).parent
         manifest_path = integration_path / "manifest.json"
         _LOGGER.debug("集成路径: %s", integration_path)
@@ -112,7 +112,7 @@ class IntegrationUpdater:
         # 启动定期检查任务
         self.update_task = self.hass.async_create_background_task(
             self._periodic_check(),
-            "ct_ble_devices_auto_update"
+            "omni_sens_auto_update"
         )
         _LOGGER.info("自动更新检查已启动（启动时已检查一次，之后每 %s 检查一次）", CHECK_INTERVAL)
     
@@ -317,38 +317,38 @@ class IntegrationUpdater:
             
             _LOGGER.info("解压完成")
             
-            # 找到集成目录（HACS 标准结构：custom_components/ct_ble_devices/）
+            # 找到集成目录（HACS 标准结构：custom_components/omni_sens/）
             extracted_path = None
             
-            # 方式1：查找解压根目录下的 custom_components/ct_ble_devices/ 结构（HACS 标准）
+            # 方式1：查找解压根目录下的 custom_components/omni_sens/ 结构（HACS 标准）
             _LOGGER.debug("尝试查找 HACS 标准结构（根目录）...")
-            custom_components_path = extract_dir / "custom_components" / "ct_ble_devices"
+            custom_components_path = extract_dir / "custom_components" / "omni_sens"
             _LOGGER.debug("检查路径: %s (存在: %s)", custom_components_path, custom_components_path.exists())
             if custom_components_path.exists():
                 manifest_path = custom_components_path / "manifest.json"
                 _LOGGER.debug("检查 manifest.json: %s (存在: %s)", manifest_path, manifest_path.exists())
                 if manifest_path.exists():
                     extracted_path = custom_components_path
-                    _LOGGER.info("找到 HACS 标准结构: custom_components/ct_ble_devices/")
+                    _LOGGER.info("找到 HACS 标准结构: custom_components/omni_sens/")
             
-            # 方式2：查找版本号前缀目录下的 custom_components/ct_ble_devices/（如 ct_ble_devices-1.0.1/custom_components/ct_ble_devices/）
+            # 方式2：查找版本号前缀目录下的 custom_components/omni_sens/（如 omni_sens-1.0.1/custom_components/omni_sens/）
             if not extracted_path:
                 _LOGGER.debug("未找到根目录下的 HACS 结构，尝试查找版本号前缀目录...")
                 items = list(extract_dir.iterdir())
                 _LOGGER.debug("扫描解压目录，找到 %d 个项目", len(items))
                 
                 for item in items:
-                    if item.is_dir() and "ct_ble_devices" in item.name.lower():
+                    if item.is_dir() and "omni_sens" in item.name.lower():
                         _LOGGER.debug("检查版本号目录: %s", item.name)
-                        # 查找 custom_components/ct_ble_devices/ 结构
-                        versioned_custom_components = item / "custom_components" / "ct_ble_devices"
+                        # 查找 custom_components/omni_sens/ 结构
+                        versioned_custom_components = item / "custom_components" / "omni_sens"
                         _LOGGER.debug("检查路径: %s (存在: %s)", versioned_custom_components, versioned_custom_components.exists())
                         if versioned_custom_components.exists():
                             manifest_path = versioned_custom_components / "manifest.json"
                             _LOGGER.debug("检查 manifest.json: %s (存在: %s)", manifest_path, manifest_path.exists())
                             if manifest_path.exists():
                                 extracted_path = versioned_custom_components
-                                _LOGGER.info("找到版本号目录下的 HACS 结构: %s/custom_components/ct_ble_devices/", item.name)
+                                _LOGGER.info("找到版本号目录下的 HACS 结构: %s/custom_components/omni_sens/", item.name)
                                 break
             
             # 方式3：查找直接包含 manifest.json 的目录（兼容旧结构）
@@ -363,15 +363,15 @@ class IntegrationUpdater:
                             extracted_path = item
                             _LOGGER.info("找到集成目录: %s", item.name)
                             break
-                        # 检查是否在子目录中（ct_ble_devices-1.0.0/ct_ble_devices/）
-                        sub_integration = item / "ct_ble_devices"
+                        # 检查是否在子目录中（omni_sens-1.0.0/omni_sens/）
+                        sub_integration = item / "omni_sens"
                         if sub_integration.exists() and (sub_integration / "manifest.json").exists():
                             extracted_path = sub_integration
                             _LOGGER.info("找到嵌套集成目录: %s", sub_integration)
                             break
             
             if not extracted_path:
-                _LOGGER.error("无法找到集成目录，请确保 ZIP 包含 custom_components/ct_ble_devices/ 或 ct_ble_devices/")
+                _LOGGER.error("无法找到集成目录，请确保 ZIP 包含 custom_components/omni_sens/ 或 omni_sens/")
                 _LOGGER.error("解压目录路径: %s", extract_dir)
                 _LOGGER.error("解压目录内容:")
                 try:
@@ -518,25 +518,25 @@ class IntegrationUpdater:
     async def _notify_update_success(self, new_version: str, reloaded: bool = False):
         """通知更新成功"""
         if reloaded:
-            message = f"CT BLE Devices 已自动更新到版本 {new_version}，集成已自动重载。"
+            message = f"Omni Sens 已自动更新到版本 {new_version}，集成已自动重载。"
         else:
-            message = f"CT BLE Devices 已自动更新到版本 {new_version}。\n请重启 Home Assistant 以应用更改。"
+            message = f"Omni Sens 已自动更新到版本 {new_version}。\n请重启 Home Assistant 以应用更改。"
         
         persistent_notification.create(
             self.hass,
             message,
-            "CT BLE Devices 自动更新",
-            f"ct_ble_devices_update_{new_version}"
+            "Omni Sens 自动更新",
+            f"omni_sens_update_{new_version}"
         )
     
     async def _notify_restart_required(self, new_version: str):
         """通知需要重启"""
         persistent_notification.create(
             self.hass,
-            f"CT BLE Devices 已更新到版本 {new_version}。\n"
+            f"Omni Sens 已更新到版本 {new_version}。\n"
             "⚠️ 请重启 Home Assistant 以应用更改。",
-            "CT BLE Devices 更新完成",
-            "ct_ble_devices_restart_required"
+            "Omni Sens 更新完成",
+            "omni_sens_restart_required"
         )
     
     async def _reload_integration(self):
